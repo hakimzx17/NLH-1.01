@@ -63,6 +63,19 @@ class PathLanding {
       .map((preId) => ALL_PATHS.find((candidate) => candidate.id === preId)?.title || preId)
       .join(' and ');
     const flashcardStats = flashcardEngine.getScopeStats({ domainId: path.id });
+    const nextStepTitle = nextTopic
+      ? `${nextTopic.code} ${nextTopic.title}`
+      : finalPassed
+        ? 'Domain complete'
+        : path.finalExam.title;
+    const nextStepLabel = nextTopic
+      ? 'Next topic'
+      : finalPassed
+        ? 'Status'
+        : finalUnlocked
+          ? 'Final gate ready'
+          : 'Final gate locked';
+    const progressTone = pct === 100 ? 'Complete' : pct > 0 ? 'In progress' : 'Ready to start';
 
     if (!isUnlocked) {
       this.container.innerHTML = `
@@ -77,34 +90,57 @@ class PathLanding {
     }
 
     this.container.innerHTML = `
-      <div class="path-landing">
-        <div class="module-header">
+      <div class="path-landing" style="--path-color:${this._escapeAttr(path.color || 'var(--color-cyan)')}">
+        <section class="module-header path-landing-hero">
           <div class="module-header__breadcrumb">
             <a href="#/">Home</a> › <a href="#/paths">CCNA Domains</a> › <span>${path.title}</span>
           </div>
-          <div class="path-landing__header" style="--path-color:${path.color}">
-            <div class="path-landing__icon">${renderTokenIcon(path.icon, 'learning-token-icon')}</div>
-            <div>
-              <h1 class="module-header__title">${path.title}</h1>
-              <p class="module-header__description">${path.description}</p>
-                <div class="timeline-card__meta" style="margin-top:0.75rem;">
-                  <span>${path.examWeight}% exam weight</span>
-                  <span>~${path.estimatedHours} study hours</span>
-                  <span>${path.topicCount} topics</span>
+          <div class="path-landing-hero__grid">
+            <div class="path-landing-hero__copy">
+              <div class="path-landing__header">
+                <div class="path-landing__icon">${renderTokenIcon(path.icon, 'learning-token-icon')}</div>
+                <div>
+                  <p class="path-landing__eyebrow">CCNA Domain ${path.examDomain || ''}</p>
+                  <h1 class="module-header__title">${path.title}</h1>
                 </div>
               </div>
+              <p class="module-header__description">${path.description}</p>
+              <div class="path-landing__meta-pills">
+                <span>${path.examWeight}% exam weight</span>
+                <span>~${path.estimatedHours} study hours</span>
+                <span>${path.topicCount} topics</span>
+                <span>${progressTone}</span>
+              </div>
             </div>
-          <div class="path-landing__progress-row">
-            <div class="path-landing__progress-bar">
-              <div class="path-landing__progress-fill" style="width:${pct}%; background:${path.color}"></div>
+
+            <div class="path-landing-hero__panel" aria-label="Domain progress summary">
+              <span class="path-landing-hero__panel-label">Path Progress</span>
+              <strong class="path-landing-hero__percent">${pct}%</strong>
+              <div class="path-landing__progress-row">
+                <div class="path-landing__progress-bar">
+                  <div class="path-landing__progress-fill" style="width:${pct}%;"></div>
+                </div>
+                <span>${pathDone}/${path.modules.length}</span>
+              </div>
+              <div class="path-landing-hero__next">
+                <small>${nextStepLabel}</small>
+                <span>${nextStepTitle}</span>
+              </div>
             </div>
-            <span class="text-mono text-sm" style="color:${path.color}">${pathDone}/${path.modules.length} topics complete (${pct}%)</span>
           </div>
-        </div>
+        </section>
 
-        ${this._renderFlashcardReviewSection(path, flashcardStats)}
+        <div class="path-landing__workspace">
+          <main class="path-landing__sequence" aria-label="${this._escapeAttr(path.title)} topic sequence">
+            <div class="path-sequence-heading">
+              <div>
+                <p class="path-sequence-heading__eyebrow">Learning Route</p>
+                <h2>Follow the numbered path</h2>
+              </div>
+              <span>${pathDone}/${path.modules.length} topics complete</span>
+            </div>
 
-        <div class="path-modules-timeline">
+            <div class="path-modules-timeline">
           ${path.modules.map((mod, i) => {
             const isDone = progressEngine.isTopicComplete(mod.id);
             const isPrev = adminPreview || i === 0 || progressEngine.isTopicComplete(path.modules[i - 1].id);
@@ -116,18 +152,18 @@ class PathLanding {
               <div class="timeline-module ${isDone ? 'timeline-module--done' : ''} ${isCurrent ? 'timeline-module--current' : ''} ${isLocked ? 'timeline-module--locked' : ''}">
                 <div class="timeline-connector" style="--path-color:${path.color}">
                     <div class="timeline-dot ${isDone ? 'timeline-dot--done' : isCurrent ? 'timeline-dot--current' : ''}">
-                      ${isDone ? '✅' : i + 1}
+                      ${i + 1}
                     </div>
-                  ${i < path.modules.length - 1 ? '<div class="timeline-line"></div>' : ''}
+                  <div class="timeline-line"></div>
                 </div>
                 <div class="timeline-content">
                   <div class="timeline-card" style="--path-color:${path.color}">
                     <div class="timeline-card__header">
                       <span class="timeline-card__icon">${renderTokenIcon(mod.icon, 'learning-token-icon')}</span>
                       <h3 class="timeline-card__title">${mod.code} ${mod.title}</h3>
-                      ${isDone ? '<span class="badge badge-success">✅ Complete</span>' : ''}
-                      ${isCurrent ? '<span class="badge badge-cyan">● Current</span>' : ''}
-                      ${isLocked ? '<span class="badge" style="background:rgba(255,255,255,0.05);color:var(--color-text-muted)">🔒 Locked</span>' : ''}
+                      ${isDone ? '<span class="badge badge-success">Complete</span>' : ''}
+                      ${isCurrent ? '<span class="badge badge-cyan">Current</span>' : ''}
+                      ${isLocked ? '<span class="badge" style="background:rgba(255,255,255,0.05);color:var(--color-text-muted)">Locked</span>' : ''}
                     </div>
                     <div class="timeline-card__meta">
                       <span>${difficultyLabel}</span>
@@ -149,7 +185,7 @@ class PathLanding {
           <div class="timeline-module ${finalPassed ? 'timeline-module--done' : ''} ${finalUnlocked && !finalPassed ? 'timeline-module--current' : ''} ${!finalUnlocked && !adminPreview ? 'timeline-module--locked' : ''}">
             <div class="timeline-connector" style="--path-color:${path.color}">
               <div class="timeline-dot ${finalPassed ? 'timeline-dot--done' : finalUnlocked ? 'timeline-dot--current' : ''}">
-                ${finalPassed ? '✅' : 'EXAM'}
+                F
               </div>
             </div>
             <div class="timeline-content">
@@ -159,9 +195,9 @@ class PathLanding {
                   <div class="timeline-card__header timeline-card__header--capstone">
                     <span class="timeline-card__icon">${renderTokenIcon('EXAM', 'learning-token-icon')}</span>
                     <h3 class="timeline-card__title">${path.finalExam.title}</h3>
-                    ${finalPassed ? '<span class="badge badge-success">✅ Passed</span>' : ''}
-                    ${!finalPassed && finalUnlocked ? '<span class="badge badge-cyan">● Ready</span>' : ''}
-                    ${!finalPassed && !finalUnlocked ? '<span class="badge" style="background:rgba(255,255,255,0.05);color:var(--color-text-muted)">🔒 Topic Quiz Gate</span>' : ''}
+                    ${finalPassed ? '<span class="badge badge-success">Passed</span>' : ''}
+                    ${!finalPassed && finalUnlocked ? '<span class="badge badge-cyan">Ready</span>' : ''}
+                    ${!finalPassed && !finalUnlocked ? '<span class="badge" style="background:rgba(255,255,255,0.05);color:var(--color-text-muted)">Topic Quiz Gate</span>' : ''}
                   </div>
 
                   <p class="timeline-capstone__summary">
@@ -235,6 +271,26 @@ class PathLanding {
               </div>
             </div>
           </div>
+            </div>
+          </main>
+
+          <aside class="path-landing__aside" aria-label="Domain support tools">
+            <section class="path-domain-summary">
+              <p class="path-domain-summary__eyebrow">Mission Brief</p>
+              <h2>${nextStepTitle}</h2>
+              <p>${nextTopic ? 'Your next checkpoint is queued. Work straight down the route to keep the domain mental model connected.' : finalPassed ? 'This domain is cleared. Use review tools to keep recall sharp before the full exam.' : 'Finish the topic gates to unlock the capstone exam for this domain.'}</p>
+              <div class="path-domain-summary__stats">
+                <span><strong>${pathDone}</strong><small>Done</small></span>
+                <span><strong>${path.modules.length - pathDone}</strong><small>Left</small></span>
+                <span><strong>${pct}%</strong><small>Progress</small></span>
+              </div>
+              ${nextTopic ? `
+                <a href="#/paths/${path.id}/${nextTopic.id}" class="btn btn-primary path-domain-summary__btn">Continue Route</a>
+              ` : ''}
+            </section>
+
+            ${this._renderFlashcardReviewSection(path, flashcardStats)}
+          </aside>
         </div>
       </div>
     `;

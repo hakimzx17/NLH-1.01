@@ -19,7 +19,7 @@ const CORE_NAV = [
 ];
 
 const TOOL_NAV = [
-  { route: '/flashcards', icon: 'sparkles', label: 'Flashcards', meta: 'Review', special: true },
+  { route: '/flashcards', icon: 'sparkles', label: 'Flashcards', meta: 'Review' },
   { route: '/resources', icon: 'archive', label: 'Resource Vault', meta: 'Library' },
   { route: '/exam', icon: 'shield', label: 'Exam Mode', meta: 'Practice' },
   { route: '/subnet-calculator', icon: 'layers', label: 'Subnet Console', meta: 'Tool' },
@@ -326,25 +326,24 @@ class Navbar {
         <div class="sidebar__section">
           <div class="sidebar__section-label">Navigation Core</div>
           ${coreHtml}
+          <div class="sidebar-timeline-section sidebar-domain-matrix ${domainMatrixOpen ? 'is-open' : ''}">
+            <button class="sidebar-domain-matrix__toggle" id="domain-matrix-toggle" type="button" aria-expanded="${domainMatrixOpen ? 'true' : 'false'}" aria-controls="domain-matrix-panel">
+              ${icon('network', 'command-nav-icon sidebar-domain-matrix__icon')}
+              <span class="sidebar-domain-matrix__title">Domain Matrix</span>
+              <span class="sidebar-domain-matrix__meta">${completedPathCount}/${ALL_PATHS.length}</span>
+              <span class="sidebar-domain-matrix__chevron" aria-hidden="true">›</span>
+            </button>
+
+            <div class="sidebar-timeline sidebar-domain-matrix__panel" id="domain-matrix-panel" ${domainMatrixOpen ? '' : 'hidden'}>
+              <div class="sidebar-timeline__line"></div>
+              ${pathsHtml}
+            </div>
+          </div>
         </div>
 
         <div class="sidebar__section sidebar-tools-section">
           <div class="sidebar__section-label">Command Tools</div>
           ${toolHtml}
-        </div>
-
-        <div class="sidebar__section sidebar-timeline-section sidebar-domain-matrix ${domainMatrixOpen ? 'is-open' : ''}">
-          <button class="sidebar-domain-matrix__toggle" id="domain-matrix-toggle" type="button" aria-expanded="${domainMatrixOpen ? 'true' : 'false'}" aria-controls="domain-matrix-panel">
-            ${icon('network', 'command-nav-icon sidebar-domain-matrix__icon')}
-            <span class="sidebar-domain-matrix__title">Domain Matrix</span>
-            <span class="sidebar-domain-matrix__meta">${completedPathCount}/${ALL_PATHS.length}</span>
-            <span class="sidebar-domain-matrix__chevron" aria-hidden="true">›</span>
-          </button>
-
-          <div class="sidebar-timeline sidebar-domain-matrix__panel" id="domain-matrix-panel" ${domainMatrixOpen ? '' : 'hidden'}>
-            <div class="sidebar-timeline__line"></div>
-            ${pathsHtml}
-          </div>
         </div>
 
         <div class="sidebar__spacer"></div>
