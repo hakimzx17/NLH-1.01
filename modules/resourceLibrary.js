@@ -855,9 +855,9 @@ class ResourceLibrary {
 
     const modal = document.createElement('div');
     modal.id = 'fc-global-modal';
-    modal.className = 'fc-modal-overlay fc-modal-overlay--command';
+    modal.className = 'fcard-overlay';
     modal.innerHTML = `
-      <div class="fc-modal-container fc-modal-container--command">
+      <div class="fcard-shell">
         <div id="fc-deck-selection-content">
           ${resumableSession ? this._getStudySessionHTML() : this._getDeckSelectionHTML()}
         </div>
@@ -899,7 +899,8 @@ class ResourceLibrary {
     if (!this._flashcardNotice) return '';
 
     return `
-      <div class="ops-flash__notice ops-flash__notice--${this._flashcardNotice.type}" role="status" aria-live="polite">
+      <div class="fcard-notice fcard-notice--${this._flashcardNotice.type}" role="status" aria-live="polite">
+        ${renderTokenIcon(this._flashcardNotice.type === 'warning' ? 'WARN' : 'OK', 'learning-token-icon')}
         ${escapeHtml(this._flashcardNotice.message)}
       </div>
     `;
@@ -939,136 +940,98 @@ class ResourceLibrary {
     const dueLoadLabel = overallProgress.dueToday > 0 ? 'Pending Recall' : 'Stable Queue';
 
     return `
-      <div class="ops-flash">
-        <header class="ops-flash__hero">
-          <div class="ops-flash__hero-copy">
-            <div class="ops-flash__kicker">Flashcard Command Deck</div>
-            <h2 class="ops-flash__title">CCNA <span class="ops-flash__title-accent">Flashcards</span></h2>
-            <p class="ops-flash__body">
-              Launch active-recall sessions inside the dashboard command layer. Review due cards, inspect deck load,
-              and keep recall decisions visible instead of hiding them inside a generic popup flow.
+      <div>
+        <header class="fcard-hero">
+          <div class="fcard-hero__content">
+            <div class="fcard-hero__kicker">Flashcard Command Deck</div>
+            <h2 class="fcard-hero__title">CCNA <span class="fcard-hero__title-accent">Flashcards</span></h2>
+            <p class="fcard-hero__desc">
+              Launch active-recall sessions. Review due cards, inspect deck load,
+              and master the CCNA topics efficiently.
             </p>
             ${this._getFlashcardNoticeHTML()}
           </div>
-          <div class="ops-flash__hero-stats">
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Decks Online</span>
-              <span class="ops-flash__stat-value ops-flash__stat-value--signal">${overallProgress.totalDecks}</span>
+          <div class="fcard-hero__stats">
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Decks Online</span>
+              <span class="fcard-stat__value fcard-stat__value--cyan">${overallProgress.totalDecks}</span>
             </div>
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Cards Loaded</span>
-              <span class="ops-flash__stat-value">${overallProgress.totalCards}</span>
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Cards Loaded</span>
+              <span class="fcard-stat__value">${overallProgress.totalCards}</span>
             </div>
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">${dueLoadLabel}</span>
-              <span class="ops-flash__stat-value ops-flash__stat-value--amber">${overallProgress.dueToday}</span>
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">${dueLoadLabel}</span>
+              <span class="fcard-stat__value fcard-stat__value--amber">${overallProgress.dueToday}</span>
             </div>
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Mastery</span>
-              <span class="ops-flash__stat-value ops-flash__stat-value--mint">${overallProgress.overallCompletion}%</span>
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Mastery</span>
+              <span class="fcard-stat__value fcard-stat__value--mint">${overallProgress.overallCompletion}%</span>
             </div>
           </div>
         </header>
 
-        <div class="ops-flash__shell">
-          <div class="ops-flash__main">
-            <section class="ops-flash__rail">
-              <div>
-                <div class="ops-flash__rail-title">Deck Selection Rail</div>
-                <div class="ops-flash__rail-copy">Choose a deck by workload and mastery, not just by title.</div>
-              </div>
-              <div class="ops-flash__rail-actions">
-                <button class="ops-flash__action ops-flash__action--primary fc-modal-action-btn" data-action="import" type="button">Import Deck</button>
-                <button class="ops-flash__action fc-modal-action-btn" data-action="export" type="button">Export Queue</button>
-                <button class="ops-flash__action fc-modal-action-btn" data-action="add-deck" type="button">Create Deck</button>
-                <button class="ops-flash__action" id="fc-global-close" type="button">Close</button>
-              </div>
-            </section>
-
-            <section class="ops-flash__deck-grid">
-              ${decks.map(deck => {
-                const progress = flashcardEngine.getDeckProgress(deck.id);
-                const meta = this._getFlashcardDeckMeta(deck.id);
-                const status = this._getFlashcardDeckStatus(progress);
-                return `
-                  <article class="ops-flash__deck ops-flash__deck--${meta.tone} fc-deck-selectable" data-deck-id="${deck.id}" tabindex="0" role="button" aria-label="Start ${escapeHtml(deck.name)} deck">
-                    <div class="ops-flash__deck-top">
-                      <span class="ops-flash__badge">${meta.label}</span>
-                      <span class="ops-flash__status">${status}</span>
-                    </div>
-                    <div class="ops-flash__deck-icon">${renderTokenIcon(meta.icon, 'learning-token-icon')}</div>
-                    <div class="ops-flash__deck-name">${escapeHtml(deck.name)}</div>
-                    <p class="ops-flash__deck-copy">${escapeHtml(deck.description || 'Focused recall deck for CCNA review.')}</p>
-                    <div class="ops-flash__metrics">
-                      <div class="ops-flash__metric">
-                        <span class="ops-flash__metric-label">Cards</span>
-                        <span class="ops-flash__metric-value">${progress.totalCards}</span>
-                      </div>
-                      <div class="ops-flash__metric">
-                        <span class="ops-flash__metric-label">Due</span>
-                        <span class="ops-flash__metric-value">${progress.dueToday}</span>
-                      </div>
-                      <div class="ops-flash__metric">
-                        <span class="ops-flash__metric-label">Mastered</span>
-                        <span class="ops-flash__metric-value">${progress.completion}%</span>
-                      </div>
-                    </div>
-                    <div class="ops-flash__progress">
-                      <div class="ops-flash__progress-fill" data-progress="${progress.completion}"></div>
-                    </div>
-                    <button class="ops-flash__action ops-flash__action--primary ops-flash__deck-cta fc-start-study-btn" data-deck-id="${deck.id}" type="button">Launch Session</button>
-                  </article>
-                `;
-              }).join('')}
-            </section>
+        <div class="fcard-body">
+          <div class="fcard-toolbar">
+            <h3 class="fcard-toolbar__title">Deck Selection</h3>
+            <div class="fcard-toolbar__actions">
+              <button class="fcard-btn fcard-btn--ghost fc-modal-action-btn" data-action="import" type="button">Import Deck</button>
+              <button class="fcard-btn fcard-btn--ghost fc-modal-action-btn" data-action="export" type="button">Export Queue</button>
+              <button class="fcard-btn fcard-btn--primary fc-modal-action-btn" data-action="add-deck" type="button">Create Deck</button>
+              <button class="fcard-btn fcard-btn--danger" id="fc-global-close" type="button">Close</button>
+            </div>
           </div>
 
-          <aside class="ops-flash__side">
-            <section class="ops-flash__summary">
-              <div class="ops-flash__summary-title">Review Workflow</div>
-              <div class="ops-flash__summary-list">
-                <div class="ops-flash__summary-item">
-                  <span class="ops-flash__summary-key">1</span>
-                  <div>
-                    <div class="ops-flash__summary-value">Inspect the due queue</div>
-                    <div class="ops-flash__summary-copy">Start with decks carrying the highest recall debt.</div>
-                  </div>
-                </div>
-                <div class="ops-flash__summary-item">
-                  <span class="ops-flash__summary-key">2</span>
-                  <div>
-                    <div class="ops-flash__summary-value">Reveal only when ready</div>
-                    <div class="ops-flash__summary-copy">The question surface stays dominant until you intentionally flip.</div>
-                  </div>
-                </div>
-                <div class="ops-flash__summary-item">
-                  <span class="ops-flash__summary-key">3</span>
-                  <div>
-                    <div class="ops-flash__summary-value">Rate the recall honestly</div>
-                    <div class="ops-flash__summary-copy">Each button previews how far the next interval will move.</div>
-                  </div>
-                </div>
-              </div>
-            </section>
+          <div class="fcard-grid">
+            ${decks.map(deck => {
+              const progress = flashcardEngine.getDeckProgress(deck.id);
+              const meta = this._getFlashcardDeckMeta(deck.id);
+              const status = this._getFlashcardDeckStatus(progress);
+              
+              const deckColorMap = {
+                'signal': 'var(--color-primary)',
+                'amber': 'var(--color-warning)',
+                'mint': 'var(--color-success)',
+                'violet': 'var(--color-accent)',
+                'danger': 'var(--color-error)'
+              };
+              const deckColor = deckColorMap[meta.tone] || 'var(--color-primary)';
+              const statusClass = progress.dueToday > 0 ? 'fcard-deck__status--due' : '';
 
-            <section class="ops-flash__summary">
-              <div class="ops-flash__summary-title">Anchored Vocabulary</div>
-              <div class="ops-flash__term-list">
-                <article class="ops-flash__term">
-                  <div class="ops-flash__term-title">Due</div>
-                  <div class="ops-flash__term-copy">Cards whose next review time has arrived.</div>
+              return `
+                <article class="fcard-deck fc-deck-selectable" data-deck-id="${deck.id}" style="--deck-color: ${deckColor};" tabindex="0" role="button" aria-label="Start ${escapeHtml(deck.name)} deck">
+                  <div class="fcard-deck__header">
+                    <div class="fcard-deck__icon">${renderTokenIcon(meta.icon, 'learning-token-icon')}</div>
+                    <span class="fcard-deck__status ${statusClass}">${status}</span>
+                  </div>
+                  
+                  <h4 class="fcard-deck__title">${escapeHtml(deck.name)}</h4>
+                  <p class="fcard-deck__desc">${escapeHtml(deck.description || 'Focused recall deck for CCNA review.')}</p>
+                  
+                  <div class="fcard-deck__metrics">
+                    <div class="fcard-deck__metric">
+                      <span class="fcard-deck__metric-val">${progress.totalCards}</span>
+                      <span class="fcard-deck__metric-lbl">Cards</span>
+                    </div>
+                    <div class="fcard-deck__metric">
+                      <span class="fcard-deck__metric-val" style="color: var(--color-warning);">${progress.dueToday}</span>
+                      <span class="fcard-deck__metric-lbl">Due</span>
+                    </div>
+                    <div class="fcard-deck__metric">
+                      <span class="fcard-deck__metric-val" style="color: var(--color-success);">${progress.completion}%</span>
+                      <span class="fcard-deck__metric-lbl">Mastery</span>
+                    </div>
+                  </div>
+                  
+                  <div class="fcard-deck__progress">
+                    <div class="fcard-deck__progress-fill" data-progress="${progress.completion}"></div>
+                  </div>
+                  
+                  <button class="fcard-btn fcard-btn--primary fcard-deck__btn fc-start-study-btn" data-deck-id="${deck.id}" type="button">Launch Session</button>
                 </article>
-                <article class="ops-flash__term">
-                  <div class="ops-flash__term-title">Mastered</div>
-                  <div class="ops-flash__term-copy">Cards that have reached mature intervals through repeated successful recall.</div>
-                </article>
-                <article class="ops-flash__term">
-                  <div class="ops-flash__term-title">Again / Hard / Good / Easy</div>
-                  <div class="ops-flash__term-copy">Recall ratings that directly control the next review interval.</div>
-                </article>
-              </div>
-            </section>
-          </aside>
+              `;
+            }).join('')}
+          </div>
         </div>
       </div>
     `;
@@ -1163,160 +1126,127 @@ class ResourceLibrary {
     const difficulty = currentCard.difficulty || 'new';
 
     return `
-      <div class="ops-flash">
-        <header class="ops-flash__hero">
-          <div class="ops-flash__hero-copy">
-            <div class="ops-flash__kicker">Live Study Session</div>
-            <h2 class="ops-flash__title">${escapeHtml(deck.name)} <span class="ops-flash__title-accent">Review Loop</span></h2>
-            <p class="ops-flash__body">
+      <style>
+        /* Force 3D flip animation styles directly to bypass cache */
+        .fcard-shell { overflow: visible !important; overflow-x: visible !important; overflow-y: visible !important; }
+        #fc-card-container { perspective: 2000px; }
+        #fc-card-3d {
+          position: relative;
+          width: 100%;
+          min-height: 380px;
+          transform-style: preserve-3d;
+          transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          transform: rotateY(0deg);
+        }
+        #fc-card-3d.is-flipped {
+          transform: rotateY(180deg) !important;
+        }
+        .fcard-face {
+          position: absolute;
+          inset: 0;
+          backface-visibility: hidden !important;
+          -webkit-backface-visibility: hidden !important;
+        }
+        .fcard-face--front {
+          transform: rotateY(0deg) !important;
+        }
+        .fcard-face--back {
+          transform: rotateY(180deg) !important;
+        }
+      </style>
+      <div>
+        <header class="fcard-hero">
+          <div class="fcard-hero__content">
+            <div class="fcard-hero__kicker">Live Study Session</div>
+            <h2 class="fcard-hero__title">${escapeHtml(deck.name)} <span class="fcard-hero__title-accent">Review</span></h2>
+            <p class="fcard-hero__desc">
               Read the prompt, decide if you truly know it, reveal the answer only when ready, then rate the recall honestly.
             </p>
-            <div class="ops-flash__progress ops-flash__progress--hero">
-              <div class="ops-flash__progress-fill" data-progress="${progress}"></div>
-            </div>
           </div>
-          <div class="ops-flash__hero-stats">
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Card</span>
-              <span class="ops-flash__stat-value ops-flash__stat-value--signal">${currentIndex + 1}/${cards.length}</span>
+          <div class="fcard-hero__stats">
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Card</span>
+              <span class="fcard-stat__value fcard-stat__value--cyan">${currentIndex + 1}/${cards.length}</span>
             </div>
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Reviewed</span>
-              <span class="ops-flash__stat-value">${stats.cardsReviewed}</span>
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Accuracy</span>
+              <span class="fcard-stat__value fcard-stat__value--mint">${stats.accuracy}%</span>
             </div>
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Accuracy</span>
-              <span class="ops-flash__stat-value ops-flash__stat-value--mint">${stats.accuracy}%</span>
-            </div>
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">State</span>
-              <span class="ops-flash__stat-value ops-flash__stat-value--amber">${difficulty}</span>
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">State</span>
+              <span class="fcard-stat__value fcard-stat__value--amber">${difficulty}</span>
             </div>
           </div>
         </header>
 
-        <div class="ops-flash__shell">
-          <div class="ops-flash__main">
-            <section class="ops-flash__study">
-              <div class="ops-flash__stage">
-                <div>
-                  <div class="ops-flash__stage-title">Question → Reveal → Rate</div>
-                  <div class="ops-flash__stage-copy">The next interval only appears after the answer is revealed.</div>
-                </div>
-                <div class="ops-flash__stage-meta">
-                  <span class="ops-flash__chip ops-flash__chip--signal">${deckMeta.label}</span>
-                  <span class="ops-flash__chip">${difficulty}</span>
-                  <span class="ops-flash__chip ops-flash__chip--mint">${this._isFlipped ? 'Answer Revealed' : 'Question Locked'}</span>
-                </div>
-              </div>
-
-              <div class="ops-flash__card-wrap" id="fc-card-container">
-                <div class="ops-flash__card ${revealClass}" id="fc-card-3d" tabindex="0" role="button" aria-label="Flip flashcard">
-                  <article class="ops-flash__card-face ops-flash__card-face--question">
-                    <div class="ops-flash__card-head">
-                      <span class="ops-flash__card-state">${escapeHtml(deck.name)}</span>
-                      <span class="ops-flash__card-index">Card ${currentIndex + 1} of ${cards.length}</span>
-                    </div>
-                    <div class="ops-flash__card-body">
-                      <div class="ops-flash__prompt-label">Prompt</div>
-                      <h3 class="ops-flash__prompt">${escapeHtml(currentCard.front)}</h3>
-                    </div>
-                    <div class="ops-flash__card-foot">
-                      <span class="ops-flash__hint">Press Space or click to reveal the answer.</span>
-                      <span class="ops-flash__card-index">Question Surface</span>
-                    </div>
-                  </article>
-
-                  <article class="ops-flash__card-face ops-flash__card-face--answer">
-                    <div class="ops-flash__card-head">
-                      <span class="ops-flash__card-state">Answer Surface</span>
-                      <span class="ops-flash__card-index">${this._getIntervalText(currentCard, 2)} typical next review</span>
-                    </div>
-                    <div class="ops-flash__card-body">
-                      <div class="ops-flash__prompt-label">Answer</div>
-                      <div class="ops-flash__answer">${escapeHtml(currentCard.back)}</div>
-                    </div>
-                    <div class="ops-flash__card-foot">
-                      <span class="ops-flash__hint">Use the rating bar below to set the next interval.</span>
-                      <span class="ops-flash__card-index">Answer Revealed</span>
-                    </div>
-                  </article>
-                </div>
-              </div>
-
-              <div class="ops-flash__rating-bar ${ratingVisibilityClass}" id="fc-rating-buttons">
-                <button class="ops-flash__rate ops-flash__rate--again fc-rating-btn" data-rating="0" type="button">
-                  <span class="ops-flash__rate-label">Again</span>
-                  <span class="ops-flash__rate-time">Reset queue</span>
-                </button>
-                <button class="ops-flash__rate ops-flash__rate--hard fc-rating-btn" data-rating="1" type="button">
-                  <span class="ops-flash__rate-label">Hard</span>
-                  <span class="ops-flash__rate-time">~6 min / short retry</span>
-                </button>
-                <button class="ops-flash__rate ops-flash__rate--good fc-rating-btn" data-rating="2" type="button">
-                  <span class="ops-flash__rate-label">Good</span>
-                  <span class="ops-flash__rate-time">${this._getIntervalText(currentCard, 2)}</span>
-                </button>
-                <button class="ops-flash__rate ops-flash__rate--easy fc-rating-btn" data-rating="3" type="button">
-                  <span class="ops-flash__rate-label">Easy</span>
-                  <span class="ops-flash__rate-time">${this._getIntervalText(currentCard, 3)}</span>
-                </button>
-              </div>
-
-              <div class="ops-flash__controls">
-                <div class="ops-flash__rail-actions">
-                  <button id="fc-back-to-decks" class="ops-flash__action" type="button">All Decks</button>
-                  <button id="fc-prev-card" class="ops-flash__action" type="button">Previous</button>
-                  <button id="fc-next-card" class="ops-flash__action ops-flash__action--primary" type="button">${this._isFlipped ? 'Rate Good + Next' : 'Reveal Answer'}</button>
-                </div>
-                <div class="ops-flash__shortcut-row">
-                  <span class="ops-flash__shortcut">Space: Flip</span>
-                  <span class="ops-flash__shortcut">1-4: Rate</span>
-                  <span class="ops-flash__shortcut">Left/Right: Navigate</span>
-                  <span class="ops-flash__shortcut">Esc: Close</span>
-                </div>
-                <button id="fc-end-session" class="ops-flash__action ops-flash__action--danger" type="button">End Session</button>
-              </div>
-            </section>
+        <div class="fcard-body">
+          <div class="fcard-toolbar">
+            <h3 class="fcard-toolbar__title">Review Loop</h3>
+            <div class="fcard-toolbar__actions">
+              <button class="fcard-btn fcard-btn--ghost" id="fc-back-to-decks" type="button">All Decks</button>
+              <button class="fcard-btn fcard-btn--danger" id="fc-end-session" type="button">End Session</button>
+            </div>
           </div>
 
-          <aside class="ops-flash__side">
-            <section class="ops-flash__summary">
-              <div class="ops-flash__summary-title">Telemetry</div>
-              <div class="ops-flash__summary-grid">
-                <div class="ops-flash__summary-card">
-                  <span class="ops-flash__summary-card-value">${stats.cardsReviewed}</span>
-                  <span class="ops-flash__summary-card-label">Reviewed</span>
-                </div>
-                <div class="ops-flash__summary-card">
-                  <span class="ops-flash__summary-card-value">${stats.accuracy}%</span>
-                  <span class="ops-flash__summary-card-label">Accuracy</span>
-                </div>
-                <div class="ops-flash__summary-card">
-                  <span class="ops-flash__summary-card-value">${this._formatTime(stats.elapsed)}</span>
-                  <span class="ops-flash__summary-card-label">Elapsed</span>
-                </div>
-              </div>
-            </section>
+          <div class="fcard-study-area">
+            <div class="fcard-stage" id="fc-card-container">
+              <div class="fcard-3d ${revealClass}" id="fc-card-3d" tabindex="0" role="button" aria-label="Flip flashcard">
+                
+                <article class="fcard-face fcard-face--front">
+                  <div class="fcard-face__header">
+                    <span class="fcard-face__badge fcard-face__badge--cyan">${deckMeta.label}</span>
+                    <span>Card ${currentIndex + 1} of ${cards.length}</span>
+                  </div>
+                  <div class="fcard-face__content">
+                    <h3 class="fcard-face__question">${escapeHtml(currentCard.front)}</h3>
+                  </div>
+                  <div class="fcard-face__footer">
+                    Press Space or Click to reveal answer
+                  </div>
+                </article>
 
-            <section class="ops-flash__summary">
-              <div class="ops-flash__summary-title">What This Rating Means</div>
-              <div class="ops-flash__term-list">
-                <article class="ops-flash__term">
-                  <div class="ops-flash__term-title">Again</div>
-                  <div class="ops-flash__term-copy">Use when recall failed. The card returns quickly.</div>
+                <article class="fcard-face fcard-face--back">
+                  <div class="fcard-face__header">
+                    <span class="fcard-face__badge">Answer</span>
+                    <span>${this._getIntervalText(currentCard, 2)} typical next review</span>
+                  </div>
+                  <div class="fcard-face__content">
+                    <div class="fcard-face__answer">${escapeHtml(currentCard.back)}</div>
+                  </div>
+                  <div class="fcard-face__footer">
+                    Rate your recall below
+                  </div>
                 </article>
-                <article class="ops-flash__term">
-                  <div class="ops-flash__term-title">Good</div>
-                  <div class="ops-flash__term-copy">Use when recall felt correct without heavy effort.</div>
-                </article>
-                <article class="ops-flash__term">
-                  <div class="ops-flash__term-title">Easy</div>
-                  <div class="ops-flash__term-copy">Use only when the answer felt immediate and obvious.</div>
-                </article>
+
               </div>
-            </section>
-          </aside>
+            </div>
+
+            <div class="fcard-controls ${ratingVisibilityClass}" id="fc-rating-buttons">
+              <div class="fcard-ratings">
+                <button class="fcard-rate-btn fc-rating-btn" data-rating="0" type="button">
+                  <span class="fcard-rate-btn__label" style="color: var(--color-error)">Again</span>
+                  <span class="fcard-rate-btn__time">< 1m</span>
+                </button>
+                <button class="fcard-rate-btn fc-rating-btn" data-rating="1" type="button">
+                  <span class="fcard-rate-btn__label" style="color: var(--color-warning)">Hard</span>
+                  <span class="fcard-rate-btn__time">~6m</span>
+                </button>
+                <button class="fcard-rate-btn fc-rating-btn" data-rating="2" type="button">
+                  <span class="fcard-rate-btn__label" style="color: var(--color-primary)">Good</span>
+                  <span class="fcard-rate-btn__time">${this._getIntervalText(currentCard, 2)}</span>
+                </button>
+                <button class="fcard-rate-btn fc-rating-btn" data-rating="3" type="button">
+                  <span class="fcard-rate-btn__label" style="color: var(--color-success)">Easy</span>
+                  <span class="fcard-rate-btn__time">${this._getIntervalText(currentCard, 3)}</span>
+                </button>
+              </div>
+            </div>
+            
+            <div class="fcard-nav">
+               <button id="fc-prev-card" class="fcard-btn fcard-btn--ghost" type="button">Previous</button>
+               <button id="fc-next-card" class="fcard-btn fcard-btn--primary" type="button">${this._isFlipped ? 'Next' : 'Reveal'}</button>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -1327,81 +1257,58 @@ class ResourceLibrary {
     const deck = this._currentSession?.deck || flashcardEngine.resumeSession()?.deck || flashcardEngine.getDeck(this._currentDeckId);
 
     return `
-      <div class="ops-flash">
-        <header class="ops-flash__hero">
-          <div class="ops-flash__hero-copy">
-            <div class="ops-flash__kicker">Session Complete</div>
-            <h2 class="ops-flash__title">${escapeHtml(deck?.name || 'Deck')} <span class="ops-flash__title-accent">Review Report</span></h2>
-            <p class="ops-flash__body">
+      <div>
+        <header class="fcard-hero">
+          <div class="fcard-hero__content">
+            <div class="fcard-hero__kicker">Session Complete</div>
+            <h2 class="fcard-hero__title">${escapeHtml(deck?.name || 'Deck')} <span class="fcard-hero__title-accent">Review Report</span></h2>
+            <p class="fcard-hero__desc">
               You completed the current queue. Use this report to decide whether to run another cycle now or return to the deck rail.
             </p>
           </div>
-          <div class="ops-flash__hero-stats">
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Reviewed</span>
-              <span class="ops-flash__stat-value ops-flash__stat-value--signal">${stats.cardsReviewed}</span>
+          <div class="fcard-hero__stats">
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Reviewed</span>
+              <span class="fcard-stat__value fcard-stat__value--cyan">${stats.cardsReviewed}</span>
             </div>
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Accuracy</span>
-              <span class="ops-flash__stat-value ops-flash__stat-value--mint">${stats.accuracy}%</span>
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Accuracy</span>
+              <span class="fcard-stat__value fcard-stat__value--mint">${stats.accuracy}%</span>
             </div>
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Elapsed</span>
-              <span class="ops-flash__stat-value">${this._formatTime(stats.elapsed)}</span>
-            </div>
-            <div class="ops-flash__stat">
-              <span class="ops-flash__stat-label">Next Move</span>
-              <span class="ops-flash__stat-value ops-flash__stat-value--amber">${stats.cardsReviewed > 0 ? 'Review' : 'Idle'}</span>
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Elapsed</span>
+              <span class="fcard-stat__value">${this._formatTime(stats.elapsed)}</span>
             </div>
           </div>
         </header>
 
-        <div class="ops-flash__shell">
-          <div class="ops-flash__main">
-            <section class="ops-flash__summary">
-              <div class="ops-flash__summary-title">Recall Breakdown</div>
-              <div class="ops-flash__summary-grid ops-flash__summary-grid--ratings">
-                <div class="ops-flash__summary-card">
-                  <span class="ops-flash__summary-card-value">${stats.ratings.again}</span>
-                  <span class="ops-flash__summary-card-label">Again</span>
-                </div>
-                <div class="ops-flash__summary-card">
-                  <span class="ops-flash__summary-card-value">${stats.ratings.hard}</span>
-                  <span class="ops-flash__summary-card-label">Hard</span>
-                </div>
-                <div class="ops-flash__summary-card">
-                  <span class="ops-flash__summary-card-value">${stats.ratings.good}</span>
-                  <span class="ops-flash__summary-card-label">Good</span>
-                </div>
-                <div class="ops-flash__summary-card">
-                  <span class="ops-flash__summary-card-value">${stats.ratings.easy}</span>
-                  <span class="ops-flash__summary-card-label">Easy</span>
-                </div>
-              </div>
-              <div class="ops-flash__controls">
-                <div class="ops-flash__rail-actions">
-                  <button class="ops-flash__action" id="fc-back-to-decks-final" type="button">Return to Decks</button>
-                  <button class="ops-flash__action ops-flash__action--primary" id="fc-study-again" type="button">Study Again</button>
-                </div>
-              </div>
-            </section>
+        <div class="fcard-body">
+          <div class="fcard-toolbar">
+            <h3 class="fcard-toolbar__title">Recall Breakdown</h3>
+            <div class="fcard-toolbar__actions">
+              <button class="fcard-btn fcard-btn--ghost" id="fc-back-to-decks-final" type="button">Return to Decks</button>
+              <button class="fcard-btn fcard-btn--primary" id="fc-study-again" type="button">Study Again</button>
+            </div>
           </div>
 
-          <aside class="ops-flash__side">
-            <section class="ops-flash__summary">
-              <div class="ops-flash__summary-title">Interpretation</div>
-              <div class="ops-flash__term-list">
-                <article class="ops-flash__term">
-                  <div class="ops-flash__term-title">High Again / Hard count</div>
-                  <div class="ops-flash__term-copy">This indicates weak recall under pressure. Re-run the deck sooner.</div>
-                </article>
-                <article class="ops-flash__term">
-                  <div class="ops-flash__term-title">High Good / Easy count</div>
-                  <div class="ops-flash__term-copy">This indicates the interval can expand without sacrificing retention.</div>
-                </article>
-              </div>
-            </section>
-          </aside>
+          <div class="fcard-grid">
+            <div class="fcard-stat" style="border-color: rgba(255, 68, 68, 0.2)">
+              <span class="fcard-stat__label">Again</span>
+              <span class="fcard-stat__value fcard-stat__value--danger">${stats.ratings.again}</span>
+            </div>
+            <div class="fcard-stat" style="border-color: rgba(255, 140, 0, 0.2)">
+              <span class="fcard-stat__label">Hard</span>
+              <span class="fcard-stat__value fcard-stat__value--amber">${stats.ratings.hard}</span>
+            </div>
+            <div class="fcard-stat" style="border-color: rgba(0, 212, 255, 0.2)">
+              <span class="fcard-stat__label">Good</span>
+              <span class="fcard-stat__value fcard-stat__value--cyan">${stats.ratings.good}</span>
+            </div>
+            <div class="fcard-stat" style="border-color: rgba(0, 230, 118, 0.2)">
+              <span class="fcard-stat__label">Easy</span>
+              <span class="fcard-stat__value fcard-stat__value--mint">${stats.ratings.easy}</span>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -1482,13 +1389,19 @@ class ResourceLibrary {
     this._isFlipped = !this._isFlipped;
     const card3d = modal.querySelector('#fc-card-3d');
     const ratingButtons = modal.querySelector('#fc-rating-buttons');
+    const nextBtn = modal.querySelector('#fc-next-card');
     
     if (card3d) {
       card3d.classList.toggle('is-flipped', this._isFlipped);
+      card3d.style.transform = this._isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
     }
     
     if (ratingButtons) {
       ratingButtons.classList.toggle('is-hidden', !this._isFlipped);
+    }
+
+    if (nextBtn) {
+      nextBtn.textContent = this._isFlipped ? 'Next' : 'Reveal';
     }
   }
 
@@ -1584,21 +1497,23 @@ class ResourceLibrary {
 
   _showImportModal(parentModal) {
     const importModal = document.createElement('div');
-    importModal.className = 'fc-modal-overlay fc-modal-overlay--command';
+    importModal.className = 'fcard-overlay';
     importModal.innerHTML = `
-      <div class="fc-modal-container fc-modal-container--narrow">
-        <div class="fc-modal-header">
-          <div class="fc-modal-title">IMPORT Import Deck</div>
-          <button class="fc-modal-close" id="fc-import-close">×</button>
-        </div>
-        <div class="fc-form-group">
-          <label class="fc-form-label">Paste JSON data:</label>
-          <textarea id="fc-import-data" class="fc-form-textarea fc-form-textarea--tall" placeholder='{"name": "My Deck", "cards": [{"front": "...", "back": "..."}]}'></textarea>
-        </div>
-        <div id="fc-import-message" class="ops-flash__dialog-message" aria-live="polite"></div>
-        <div class="ops-flash__dialog-actions">
-          <button class="fc-btn fc-btn-secondary" id="fc-import-cancel">Cancel</button>
-          <button class="fc-btn fc-btn-primary" id="fc-import-confirm">Import</button>
+      <div class="fcard-shell" style="max-width: 500px;">
+        <div class="fcard-body">
+          <div class="fcard-toolbar">
+            <h3 class="fcard-toolbar__title">Import Deck</h3>
+            <button class="fcard-btn fcard-btn--ghost" id="fc-import-close">×</button>
+          </div>
+          <div class="fcard-form-group">
+            <label class="fcard-form-label">Paste JSON data:</label>
+            <textarea id="fc-import-data" class="fcard-form-input" style="min-height: 120px; resize: vertical;" placeholder='{"name": "My Deck", "cards": [{"front": "...", "back": "..."}]}'></textarea>
+          </div>
+          <div id="fc-import-message" aria-live="polite" style="color: var(--color-error); font-size: var(--text-sm); margin-bottom: var(--space-4);"></div>
+          <div style="display: flex; gap: var(--space-3); justify-content: flex-end;">
+            <button class="fcard-btn fcard-btn--ghost" id="fc-import-cancel">Cancel</button>
+            <button class="fcard-btn fcard-btn--primary" id="fc-import-confirm">Import</button>
+          </div>
         </div>
       </div>
     `;
@@ -1629,37 +1544,39 @@ class ResourceLibrary {
 
   _showAddDeckModal(parentModal) {
     const addModal = document.createElement('div');
-    addModal.className = 'fc-modal-overlay fc-modal-overlay--command';
+    addModal.className = 'fcard-overlay';
     addModal.innerHTML = `
-      <div class="fc-modal-container fc-modal-container--narrow">
-        <div class="fc-modal-header">
-          <div class="fc-modal-title">ADD New Deck</div>
-          <button class="fc-modal-close" id="fc-add-close">×</button>
-        </div>
-        <div class="fc-form-group">
-          <label class="fc-form-label">Deck Name</label>
-          <input type="text" id="fc-new-deck-name" class="fc-form-input" placeholder="e.g., Routing Protocols">
-        </div>
-        <div class="fc-form-group">
-          <label class="fc-form-label">Description</label>
-          <textarea id="fc-new-deck-desc" class="fc-form-textarea" placeholder="What topics does this deck cover?"></textarea>
-        </div>
-        <div class="fc-form-group">
-          <label class="fc-form-label">Category</label>
-          <select id="fc-new-deck-category" class="fc-form-input">
-            <option value="network-fundamentals">Network Fundamentals</option>
-            <option value="network-access">Network Access</option>
-            <option value="ip-connectivity">IP Connectivity</option>
-            <option value="ip-services">IP Services</option>
-            <option value="security-fundamentals">Security Fundamentals</option>
-            <option value="automation">Automation & Programmability</option>
-            <option value="general">General</option>
-          </select>
-        </div>
-        <div id="fc-add-message" class="ops-flash__dialog-message" aria-live="polite"></div>
-        <div class="ops-flash__dialog-actions">
-          <button class="fc-btn fc-btn-secondary" id="fc-add-cancel">Cancel</button>
-          <button class="fc-btn fc-btn-primary" id="fc-add-confirm">Create Deck</button>
+      <div class="fcard-shell" style="max-width: 500px;">
+        <div class="fcard-body">
+          <div class="fcard-toolbar">
+            <h3 class="fcard-toolbar__title">New Deck</h3>
+            <button class="fcard-btn fcard-btn--ghost" id="fc-add-close">×</button>
+          </div>
+          <div class="fcard-form-group">
+            <label class="fcard-form-label">Deck Name</label>
+            <input type="text" id="fc-new-deck-name" class="fcard-form-input" placeholder="e.g., Routing Protocols">
+          </div>
+          <div class="fcard-form-group">
+            <label class="fcard-form-label">Description</label>
+            <textarea id="fc-new-deck-desc" class="fcard-form-input" style="min-height: 80px; resize: vertical;" placeholder="What topics does this deck cover?"></textarea>
+          </div>
+          <div class="fcard-form-group">
+            <label class="fcard-form-label">Category</label>
+            <select id="fc-new-deck-category" class="fcard-form-input">
+              <option value="network-fundamentals">Network Fundamentals</option>
+              <option value="network-access">Network Access</option>
+              <option value="ip-connectivity">IP Connectivity</option>
+              <option value="ip-services">IP Services</option>
+              <option value="security-fundamentals">Security Fundamentals</option>
+              <option value="automation">Automation & Programmability</option>
+              <option value="general">General</option>
+            </select>
+          </div>
+          <div id="fc-add-message" aria-live="polite" style="color: var(--color-error); font-size: var(--text-sm); margin-bottom: var(--space-4);"></div>
+          <div style="display: flex; gap: var(--space-3); justify-content: flex-end;">
+            <button class="fcard-btn fcard-btn--ghost" id="fc-add-cancel">Cancel</button>
+            <button class="fcard-btn fcard-btn--primary" id="fc-add-confirm">Create Deck</button>
+          </div>
         </div>
       </div>
     `;
@@ -1745,35 +1662,35 @@ class ResourceLibrary {
   _renderDeckEditor(panel) {
     // Placeholder editor shell until card authoring is redesigned.
     panel.innerHTML = `
-      <section class="ops-flash ops-flash--editor-placeholder">
-        <div class="ops-flash__shell ops-flash__shell--single">
-          <header class="ops-flash__hero">
-            <div>
-              <p class="ops-flash__kicker">Deck Editor</p>
-              <h3 class="ops-flash__title">Card Authoring Pipeline</h3>
+      <div class="fcard-shell">
+        <header class="fcard-hero">
+          <div class="fcard-hero__content">
+            <p class="fcard-hero__kicker">Deck Editor</p>
+            <h3 class="fcard-hero__title">Card Authoring Pipeline</h3>
+          </div>
+          <div class="fcard-hero__stats">
+            <button id="fc-back-to-decks" class="fcard-btn fcard-btn--primary">Back to Decks</button>
+          </div>
+        </header>
+        <div class="fcard-body">
+          <div class="fcard-grid">
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Status</span>
+              <span class="fcard-stat__value fcard-stat__value--cyan">Planned</span>
+              <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">
+                Card authoring will be redesigned after the study workflow is stabilized.
+              </p>
             </div>
-            <button id="fc-back-to-decks" class="ops-flash__action">Back to Decks</button>
-          </header>
-          <section class="ops-flash__summary">
-            <div class="ops-flash__summary-grid">
-              <article class="ops-flash__summary-item">
-                <p class="ops-flash__summary-key">Status</p>
-                <p class="ops-flash__summary-value">Planned</p>
-                <p class="ops-flash__summary-copy">
-                  Card authoring will be redesigned after the study workflow is stabilized.
-                </p>
-              </article>
-              <article class="ops-flash__summary-item">
-                <p class="ops-flash__summary-key">Current Path</p>
-                <p class="ops-flash__summary-value">Import / Export</p>
-                <p class="ops-flash__summary-copy">
-                  Use deck import or export to manage content until the editor is rebuilt.
-                </p>
-              </article>
+            <div class="fcard-stat">
+              <span class="fcard-stat__label">Current Path</span>
+              <span class="fcard-stat__value fcard-stat__value--amber">Import / Export</span>
+              <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">
+                Use deck import or export to manage content until the editor is rebuilt.
+              </p>
             </div>
-          </section>
+          </div>
         </div>
-      </section>
+      </div>
     `;
 
     panel.querySelector('#fc-back-to-decks')?.addEventListener('click', () => {

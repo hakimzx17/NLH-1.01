@@ -1,12 +1,11 @@
 /**
  * osiTcpipVisualizer.js — OSI and TCP/IP practice lab
  * Premium visual overhaul: nested packet diagram, animated data flow,
- * glowing active states, guided lab checkpoints, and quiz handoff.
+ * and glowing active states.
  */
 
 import { eventBus } from '../js/eventBus.js';
 import { renderTokenIcon } from '../utils/tokenIcons.js';
-import { ProtocolStackPracticeLab } from '../components/protocolStackPracticeLab.js';
 
 function renderIconLabel(token, label, className = 'learning-token-icon') {
   return `${renderTokenIcon(token, className)}<span>${label}</span>`;
@@ -78,8 +77,6 @@ class OsiTcpipVisualizer {
     this._currentStep = 0;
     this._playSpeed = 1;
     this._data = 'Hello World!';
-    this._practiceLab = null;
-    this._practiceLabState = null;
     this._autoTimer = null;
   }
 
@@ -92,8 +89,6 @@ class OsiTcpipVisualizer {
      MAIN RENDER
      ══════════════════════════════════════════ */
   _render() {
-    this._stashPracticeLabState();
-
     this.container.innerHTML = `
       <style>
         .osi-viz { --glow-cyan: rgba(0,206,209,0.35); }
@@ -268,7 +263,7 @@ class OsiTcpipVisualizer {
           </div>
           <h1 class="module-header__title" style="display:flex; align-items:center; gap:0.5rem;">${renderIconLabel('LAB', 'OSI and TCP/IP Practice Lab')}</h1>
           <p class="module-header__description">
-            Run the live encapsulation timeline, then clear a guided command-deck lab to prove you can place PDUs, protocols, and troubleshooting scope on the correct layer.
+            Run the live encapsulation timeline to visualize how data moves through the OSI and TCP/IP models.
           </p>
         </div>
 
@@ -356,13 +351,16 @@ class OsiTcpipVisualizer {
           </div>
         </div>
 
-        <div id="osi-practice-lab"></div>
+        <div style="text-align:center; margin-top: 2rem; margin-bottom: 2rem;">
+          <button id="btn-ready-quiz" class="osi-ctrl-btn primary" style="font-size: 1.1rem; padding: 1rem 2.5rem; border-radius: 50px; text-transform: uppercase; letter-spacing: 1px;">
+            READY TO TAKE QUIZZ
+          </button>
+        </div>
       </div>
     `;
 
     this._bindEvents();
     this._updateDisplay();
-    this._mountPracticeLab();
   }
 
   /* ══════════════════════════════════════════
@@ -561,42 +559,22 @@ class OsiTcpipVisualizer {
   }
 
   /* ══════════════════════════════════════════
-     QUIZ MODE
+     EVENT BINDING
      ══════════════════════════════════════════ */
   _launchQuizMode() {
-    // Try to seamlessly switch to the Quiz tab if embedded in the lesson
     const quizTabBtn = document.querySelector('button[data-tab="quiz"]');
     if (quizTabBtn) {
       quizTabBtn.click();
       return;
     }
-    
-    // Fallback if accessed via standalone simulation route - go to quiz tab
     eventBus.emit('nav:route-change', { route: '/paths/fundamentals/fundamentals-1-1-osi-tcp-ip-models?tab=quiz' });
   }
 
-  _stashPracticeLabState() {
-    if (!this._practiceLab) return;
-    this._practiceLabState = this._practiceLab.getState();
-    this._practiceLab.destroy();
-    this._practiceLab = null;
-  }
-
-  _mountPracticeLab() {
-    const mountPoint = this.container?.querySelector('#osi-practice-lab');
-    if (!mountPoint) return;
-
-    this._practiceLab = new ProtocolStackPracticeLab({
-      initialState: this._practiceLabState,
-      onLaunchQuiz: () => this._launchQuizMode(),
-    });
-    this._practiceLab.mount(mountPoint);
-  }
-
-  /* ══════════════════════════════════════════
-     EVENT BINDING
-     ══════════════════════════════════════════ */
   _bindEvents() {
+    this.container.querySelector('#btn-ready-quiz')?.addEventListener('click', () => {
+      this._launchQuizMode();
+    });
+
     this.container.querySelector('#btn-reset')?.addEventListener('click', () => {
       this._clearAutoTimer();
       this._currentStep = 0;
@@ -701,14 +679,11 @@ class OsiTcpipVisualizer {
     this._currentStep = 0;
     this._isPlaying = false;
     this._playSpeed = 1;
-    this._practiceLabState = null;
     this._render();
   }
   step() { }
   destroy() {
     this._clearAutoTimer();
-    this._stashPracticeLabState();
-    this._practiceLabState = null;
     this.container = null;
   }
 }

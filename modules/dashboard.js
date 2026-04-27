@@ -1,9 +1,9 @@
 /**
  * dashboard.js — NetlearnHub Landing Page
  *
- * A simple TryHackMe/HackTheBox-inspired landing experience for new users:
- * focused hero, concise identity copy, terminal-style status, and a clean
- * learning roadmap list.
+ * A premium, concise landing experience: focused hero with glassmorphic
+ * stat cards, enhanced terminal status, visual learning loop, and a
+ * streamlined domain roadmap.
  */
 
 import { stateManager } from '../js/stateManager.js';
@@ -17,6 +17,8 @@ const ICONS = {
   shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
   flash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.7 4.7L18 9.4l-4.3 1.7L12 16l-1.7-4.9L6 9.4l4.3-1.7z"/><path d="M19 13l.8 2.1.2.1L22 16l-2 .8-.2.1L19 19l-.8-2.1-.2-.1L16 16l2-.8.2-.1z"/></svg>`,
   chevron: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+  target: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+  clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
 };
 
 function icon(name, className = '') {
@@ -32,7 +34,7 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function trimCopy(value, maxLength = 118) {
+function trimCopy(value, maxLength = 90) {
   const text = String(value || '').trim();
   return text.length > maxLength ? `${text.slice(0, maxLength - 1).trim()}…` : text;
 }
@@ -53,13 +55,15 @@ class Dashboard {
 
     this.container.innerHTML = `
       <div class="nh-simple" aria-labelledby="netlearnhub-title">
+
+        <!-- ═══ HERO ═══ -->
         <section class="nh-simple-hero" aria-label="NetlearnHub introduction">
           <div class="nh-simple-hero__copy">
             <p class="nh-simple-label">NetlearnHub / CCNA Training Lab</p>
             <h1 id="netlearnhub-title">NETWORK LEARN HUB</h1>
             <p class="nh-simple-lead">
-              NetlearnHub is an interactive learning platform for new networking students. It explains CCNA concepts,
-              shows how packets move, and gives you labs, quizzes, flashcards, and practice exams in one place.
+              Interactive CCNA prep — theory, labs, quizzes, flashcards,
+              and practice exams in one focused platform.
             </p>
 
             <div class="nh-simple-actions" aria-label="Primary actions">
@@ -72,12 +76,6 @@ class Dashboard {
                 ${icon('chevron', 'nh-simple-icon')}
               </a>
             </div>
-
-            <dl class="nh-simple-stats" aria-label="NetlearnHub platform summary">
-              <div><dt>${model.curriculumStats.domainCount}</dt><dd>${icon('shield', 'nh-simple-stat-icon')} Domains</dd></div>
-              <div><dt>${model.curriculumStats.topicCount}</dt><dd>${icon('book', 'nh-simple-stat-icon')} Topics</dd></div>
-              <div><dt>${model.curriculumStats.simulationCount}</dt><dd>${icon('lab', 'nh-simple-stat-icon')} Labs</dd></div>
-            </dl>
           </div>
 
           <aside class="nh-simple-terminal" aria-label="Current learning status">
@@ -91,36 +89,72 @@ class Dashboard {
               <p>${icon('book', 'nh-simple-stat-icon')} Active path: ${escapeHtml(model.pathName)}</p>
               <p>${icon('send', 'nh-simple-stat-icon')} Next step: ${escapeHtml(model.currentObjective)}</p>
               <p>${icon('flash', 'nh-simple-stat-icon')} Progress: ${model.pathDone}/${model.pathTotal} topics clear</p>
-            </div>
-            <div class="nh-simple-progress" role="progressbar" aria-label="Active path progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${model.pathProgress}">
-              <span style="width:${model.pathProgress}%"></span>
+              <p class="nh-simple-terminal__ascii-bar">${this._buildAsciiBar(model.pathProgress)}</p>
             </div>
           </aside>
         </section>
 
-        <section class="nh-simple-section nh-simple-section--split" aria-labelledby="nh-about-title">
-          <div>
-            <p class="nh-simple-label">${icon('shield', 'nh-simple-label-icon')}What it is</p>
-            <h2 id="nh-about-title">The Ultimate Study Platform For the CCNA</h2>
+        <!-- ═══ STAT CARDS ═══ -->
+        <section class="nh-simple-stat-row" aria-label="Platform summary">
+          <div class="nh-simple-stat-card">
+            <div class="nh-simple-stat-card__icon">${icon('shield')}</div>
+            <div class="nh-simple-stat-card__info">
+              <span class="nh-simple-stat-card__num">${model.curriculumStats.domainCount}</span>
+              <span class="nh-simple-stat-card__label">Domains</span>
+            </div>
           </div>
-          <p>
-            Start with beginner-friendly explanations, move into simulations, test yourself with quizzes,
-            then use flashcards and exam mode to close weak areas. NetlearnHub is built to help you understand
-            networks by doing, not just reading.
-          </p>
+          <div class="nh-simple-stat-card">
+            <div class="nh-simple-stat-card__icon">${icon('book')}</div>
+            <div class="nh-simple-stat-card__info">
+              <span class="nh-simple-stat-card__num">${model.curriculumStats.topicCount}</span>
+              <span class="nh-simple-stat-card__label">Topics</span>
+            </div>
+          </div>
+          <div class="nh-simple-stat-card">
+            <div class="nh-simple-stat-card__icon">${icon('lab')}</div>
+            <div class="nh-simple-stat-card__info">
+              <span class="nh-simple-stat-card__num">${model.curriculumStats.simulationCount}</span>
+              <span class="nh-simple-stat-card__label">Labs</span>
+            </div>
+          </div>
+          <div class="nh-simple-stat-card">
+            <div class="nh-simple-stat-card__icon">${icon('target')}</div>
+            <div class="nh-simple-stat-card__info">
+              <span class="nh-simple-stat-card__num">${model.completedCount}</span>
+              <span class="nh-simple-stat-card__label">Completed</span>
+            </div>
+          </div>
         </section>
 
+        <!-- ═══ HOW IT WORKS ═══ -->
         <section class="nh-simple-section" aria-labelledby="nh-flow-title">
           <p class="nh-simple-label">${icon('flash', 'nh-simple-label-icon')}How it works</p>
           <h2 id="nh-flow-title">One simple learning loop</h2>
           <ol class="nh-simple-flow">
-            <li><span class="nh-simple-flow-step">01</span><strong>${icon('book', 'nh-simple-label-icon')}Learn</strong><p>Read a focused CCNA topic explanation.</p></li>
-            <li><span class="nh-simple-flow-step">02</span><strong>${icon('lab', 'nh-simple-label-icon')}Practice</strong><p>Use a visual lab to see the concept work.</p></li>
-            <li><span class="nh-simple-flow-step">03</span><strong>${icon('shield', 'nh-simple-label-icon')}Validate</strong><p>Pass quizzes and review weak areas.</p></li>
-            <li><span class="nh-simple-flow-step">04</span><strong>${icon('flash', 'nh-simple-label-icon')}Prepare</strong><p>Train with flashcards and exam sessions.</p></li>
+            <li>
+              <span class="nh-simple-flow-step">01</span>
+              <strong>${icon('book', 'nh-simple-label-icon')}Learn</strong>
+              <p>Read a focused CCNA topic explanation.</p>
+            </li>
+            <li>
+              <span class="nh-simple-flow-step">02</span>
+              <strong>${icon('lab', 'nh-simple-label-icon')}Practice</strong>
+              <p>Use a visual lab to see the concept work.</p>
+            </li>
+            <li>
+              <span class="nh-simple-flow-step">03</span>
+              <strong>${icon('shield', 'nh-simple-label-icon')}Validate</strong>
+              <p>Pass quizzes and review weak areas.</p>
+            </li>
+            <li>
+              <span class="nh-simple-flow-step">04</span>
+              <strong>${icon('flash', 'nh-simple-label-icon')}Prepare</strong>
+              <p>Train with flashcards and exam sessions.</p>
+            </li>
           </ol>
         </section>
 
+        <!-- ═══ ROADMAP ═══ -->
         <section class="nh-simple-section" aria-labelledby="nh-roadmap-title">
           <div class="nh-simple-heading-row">
             <div>
@@ -134,6 +168,7 @@ class Dashboard {
           </div>
         </section>
 
+        <!-- ═══ CTA ═══ -->
         <section class="nh-simple-final" aria-label="Recommended next action">
           <div>
             <p class="nh-simple-label">${icon('send', 'nh-simple-label-icon')} Recommended</p>
@@ -307,6 +342,14 @@ class Dashboard {
       'automation-programmability': 'send',
     };
     return map[pathId] || 'book';
+  }
+
+  _buildAsciiBar(pct) {
+    const total = 20;
+    const filled = Math.round((pct / 100) * total);
+    const empty = total - filled;
+    const bar = `<span class="nh-ascii-filled">${'█'.repeat(filled)}</span><span class="nh-ascii-empty">${'░'.repeat(empty)}</span>`;
+    return `  <span class="nh-ascii-bracket">[</span>${bar}<span class="nh-ascii-bracket">]</span> <span class="nh-ascii-pct">${pct}%</span>`;
   }
 
   start() {}

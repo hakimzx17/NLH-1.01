@@ -88,7 +88,7 @@ const INITIAL_STATE = {
 
   // UI state
   theme:         'dark',
-  sidebarOpen:   true,
+  sidebarOpen:   false,
   activeModal:   null,
   adminPreview:  false,
 };

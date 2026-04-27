@@ -13,17 +13,17 @@ import { progressEngine } from '../js/progressEngine.js';
 import { showToast } from '../utils/helperFunctions.js';
 
 const CORE_NAV = [
-  { route: '/', icon: 'activity', label: 'Command Center', meta: 'Home' },
-  { route: '/paths', icon: 'book', label: 'CCNA Domains', meta: 'Curriculum' },
-  { route: '/simulations', icon: 'cpu', label: 'Simulation Grid', meta: 'Labs' },
+  { route: '/paths', icon: 'grid', label: 'Lessons', meta: '' },
+  { route: '/simulations', icon: 'server', label: 'Labs', meta: '' },
+  { route: '/exam', icon: 'shield', label: 'Quiz', meta: '' },
 ];
 
 const TOOL_NAV = [
-  { route: '/packet-journey', icon: 'send', label: 'Packet Flow', meta: 'L3 Flow' },
-  { route: '/subnet-calculator', icon: 'grid', label: 'Subnet Console', meta: 'CIDR/VLSM' },
-  { route: '/exam', icon: 'shield', label: 'Exam Mode', meta: 'Timed' },
+  { route: '/flashcards', icon: 'sparkles', label: 'Flashcards', meta: 'Review', special: true },
   { route: '/resources', icon: 'archive', label: 'Resource Vault', meta: 'Library' },
-  { route: '/flashcards', icon: 'sparkles', label: 'Flashcards', meta: 'Recall', special: true, badge: 'NEW' },
+  { route: '/exam', icon: 'shield', label: 'Exam Mode', meta: 'Practice' },
+  { route: '/subnet-calculator', icon: 'layers', label: 'Subnet Console', meta: 'Tool' },
+  { route: '/packet-journey', icon: 'send', label: 'Packet Flow', meta: 'Simulation' }
 ];
 
 const ADMIN_PASSKEY_STORAGE_KEY = 'netlearn:adminPasskey';
@@ -31,12 +31,12 @@ const ADMIN_PASSKEY_META_SELECTOR = 'meta[name="netlearn-admin-passkey"]';
 const ADMIN_PASSKEY_FALLBACK = ['a', 'd', 'm', 'i', 'n'].join('');
 
 const ICONS = {
-  activity: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9-6-18-3 9H2"/></svg>`,
-  book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
-  cpu: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>`,
+  grid: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`,
+  server: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>`,
+  cpu: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>`,
+  shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
   send: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
-  grid: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
-  shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  layers: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
   archive: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`,
   sparkles: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.7 4.7L18 9.4l-4.3 1.7L12 16l-1.7-4.9L6 9.4l4.3-1.7z"/><path d="M5 3l.7 2 .3.1L8 6l-2 1-.3.1L5 9l-.7-1.9-.3-.1L2 6l2-1 .3-.1z"/><path d="M19 13l.8 2.1.2.1L22 16l-2 .8-.2.1L19 19l-.8-2.1-.2-.1L16 16l2-.8.2-.1z"/></svg>`,
   bell: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
@@ -271,73 +271,36 @@ class Navbar {
       </a>
     `).join('');
 
+    const completedPathCount = ALL_PATHS.filter(path => progressEngine.isPathComplete(path)).length;
+    const domainMatrixOpen = this._domainMatrixOpen === true;
+
     const pathsHtml = ALL_PATHS.map((path, index) => {
       const isUnlocked = progressEngine.isPathUnlocked(path, ALL_PATHS);
       const pathDone = path.modules.filter(m => progressEngine.isTopicComplete(m.id)).length;
       const pathTotal = path.modules.length;
-      const isExpanded = this._expandedDomainId === path.id;
       const isComplete = progressEngine.isPathComplete(path);
+      
+      // Determine if it's the current active domain
+      const previousComplete = index === 0 || progressEngine.isPathComplete(ALL_PATHS[index - 1]);
+      const isCurrent = isUnlocked && !isComplete && previousComplete;
+      
       const progressPercent = pathTotal > 0 ? Math.round((pathDone / pathTotal) * 100) : 0;
-      const pathStatus = !isUnlocked ? 'locked' : isComplete ? 'complete' : pathDone > 0 ? 'progress' : 'ready';
-      const statusLabel = !isUnlocked ? 'Locked' : isComplete ? 'Complete' : pathDone > 0 ? 'In progress' : 'Ready';
-      const statusIcon = isUnlocked ? ICONS.check : ICONS.lock;
-      const prerequisiteTitle = (path.prerequisites || [])
-        .map(prereqId => ALL_PATHS.find(item => item.id === prereqId)?.shortTitle || prereqId)
-        .join(', ');
-      const lockMessage = prerequisiteTitle
-        ? `Complete ${prerequisiteTitle} to unlock this domain.`
-        : 'Complete earlier domains to unlock this domain.';
-
-      const modulesHtml = path.modules.map((mod, moduleIndex) => {
-        const isDone = progressEngine.isTopicComplete(mod.id);
-        const moduleRoute = `/paths/${path.id}/${mod.id}`;
-        const isCurrent = activeModuleId === mod.id;
-        return `
-          <a href="#${moduleRoute}" class="sidebar__nav-item sidebar__nav-item--sub sidebar-topic-link ${isDone ? 'is-complete' : ''} ${isCurrent ? 'is-current' : ''}" data-route="${moduleRoute}">
-            <span class="sidebar-topic-link__index">${escapeHtml(mod.code || String(moduleIndex + 1).padStart(2, '0'))}</span>
-            <span class="sidebar-topic-link__title">${escapeHtml(mod.title)}</span>
-            <span class="sidebar-topic-link__state" aria-hidden="true">${isDone ? ICONS.check : ''}</span>
-          </a>
-        `;
-      }).join('');
+      
+      let nodeClass = 'sidebar-timeline__node';
+      if (isComplete) nodeClass += ' is-complete';
+      else if (isCurrent) nodeClass += ' is-current';
+      else if (!isUnlocked) nodeClass += ' is-locked';
 
       return `
-        <div class="sidebar__path-group sidebar-domain sidebar-domain--${pathStatus} ${isExpanded ? 'is-expanded' : ''}" data-path="${escapeHtml(path.id)}" style="--domain-accent: ${escapeHtml(path.color || 'var(--color-primary)')}">
-          <div class="sidebar__path-header sidebar-domain-card ${isExpanded ? 'is-expanded' : ''}" data-toggle-path="${escapeHtml(path.id)}" role="button" tabindex="0" aria-expanded="${isExpanded ? 'true' : 'false'}" aria-label="${escapeHtml(path.title)}: ${statusLabel}, ${pathDone} of ${pathTotal} topics complete">
-            <span class="sidebar-domain-card__stripe" aria-hidden="true"></span>
-            <span class="sidebar-domain-card__orb" aria-hidden="true">
-              <span class="sidebar-domain-card__number">D${escapeHtml(path.examDomain || index + 1)}</span>
-            </span>
-            <span class="sidebar-domain-card__body">
-              <span class="sidebar-domain-card__topline">
-                <span class="sidebar-domain-card__title">${escapeHtml(path.shortTitle || path.title)}</span>
-                <span class="sidebar-domain-status sidebar-domain-status--${pathStatus}" title="${statusLabel}" aria-hidden="true">${statusIcon}</span>
-              </span>
-              <span class="sidebar-domain-card__meta">${path.examWeight}% exam · ${pathTotal} topics · ${path.estimatedHours}h</span>
-              <span class="sidebar-domain-progress" aria-hidden="true">
-                <span class="sidebar-domain-progress__bar" style="width: ${progressPercent}%"></span>
-              </span>
-            </span>
-            <span class="sidebar-domain-card__aside" aria-hidden="true">
-              <span class="sidebar-domain-card__progress">${pathDone}/${pathTotal}</span>
-              <span class="sidebar-domain-card__chevron">${isExpanded ? '−' : '+'}</span>
-            </span>
+        <a href="#/paths/${path.id}" class="sidebar-timeline__item ${!isUnlocked ? 'is-locked' : ''}">
+          <div class="${nodeClass}">
+            <div class="sidebar-timeline__inner-dot"></div>
           </div>
-          <div class="sidebar__path-modules sidebar-domain-topics ${isExpanded ? 'is-expanded' : ''}" data-path-modules="${escapeHtml(path.id)}" aria-hidden="${isExpanded ? 'false' : 'true'}" ${isExpanded ? '' : 'hidden'}>
-            ${isUnlocked ? `
-              <a href="#/paths/${path.id}" class="sidebar-domain-overview" aria-label="Open ${escapeHtml(path.title)} overview">
-                <span>Open domain overview</span>
-                <span aria-hidden="true">↗</span>
-              </a>
-              ${modulesHtml}
-            ` : `
-              <div class="sidebar-domain-locked">
-                ${icon('lock', 'sidebar-domain-lock-icon')}
-                <span>${escapeHtml(lockMessage)}</span>
-              </div>
-            `}
+          <div class="sidebar-timeline__content">
+            <div class="sidebar-timeline__title"><span class="sidebar-timeline__num">${index + 1}.</span> ${escapeHtml(path.shortTitle || path.title)}</div>
+            <div class="sidebar-timeline__meta">${progressPercent}% complete</div>
           </div>
-        </div>
+        </a>
       `;
     }).join('');
 
@@ -356,8 +319,7 @@ class Navbar {
             </svg>
           </span>
           <span class="command-brand-copy">
-            <span class="command-brand-title">NETLEARNHUB</span>
-            <span class="command-brand-subtitle">NETWORKING LEARNING PLATFORM</span>
+            <span class="command-brand-title">NetLearnHub</span>
           </span>
         </a>
 
@@ -366,111 +328,41 @@ class Navbar {
           ${coreHtml}
         </div>
 
-        <hr class="sidebar__divider" />
+        <div class="sidebar__section sidebar-tools-section">
+          <div class="sidebar__section-label">Command Tools</div>
+          ${toolHtml}
+        </div>
 
-        <div class="sidebar__section sidebar-domain-matrix ${this._domainMatrixOpen ? 'is-open' : ''}">
-          <button class="sidebar-domain-matrix__toggle" id="domain-matrix-toggle" type="button" aria-expanded="${this._domainMatrixOpen ? 'true' : 'false'}" aria-controls="domain-matrix-panel">
+        <div class="sidebar__section sidebar-timeline-section sidebar-domain-matrix ${domainMatrixOpen ? 'is-open' : ''}">
+          <button class="sidebar-domain-matrix__toggle" id="domain-matrix-toggle" type="button" aria-expanded="${domainMatrixOpen ? 'true' : 'false'}" aria-controls="domain-matrix-panel">
+            ${icon('network', 'command-nav-icon sidebar-domain-matrix__icon')}
             <span class="sidebar-domain-matrix__title">Domain Matrix</span>
-            <span class="sidebar-domain-matrix__meta">${ALL_PATHS.length} domains</span>
-            <span class="sidebar-domain-matrix__chevron" aria-hidden="true">${this._domainMatrixOpen ? '−' : '+'}</span>
+            <span class="sidebar-domain-matrix__meta">${completedPathCount}/${ALL_PATHS.length}</span>
+            <span class="sidebar-domain-matrix__chevron" aria-hidden="true">›</span>
           </button>
-          <div id="domain-matrix-panel" class="sidebar-domain-matrix__panel ${this._domainMatrixOpen ? 'is-open' : ''}" ${this._domainMatrixOpen ? '' : 'hidden'}>
+
+          <div class="sidebar-timeline sidebar-domain-matrix__panel" id="domain-matrix-panel" ${domainMatrixOpen ? '' : 'hidden'}>
+            <div class="sidebar-timeline__line"></div>
             ${pathsHtml}
           </div>
         </div>
 
-        <hr class="sidebar__divider" />
-
-        <div class="sidebar__section">
-          <div class="sidebar__section-label">Labs & Tools</div>
-          ${toolHtml}
-        </div>
+        <div class="sidebar__spacer"></div>
 
         <div class="command-sidebar-user">
           <span class="profile-avatar">${escapeHtml(initials)}</span>
           <span class="command-brand-copy">
             <span class="command-sidebar-user__name">${escapeHtml(profile?.name || 'Student')}</span>
-            <span class="command-sidebar-user__role">Network learner</span>
           </span>
         </div>
       </nav>
     `;
 
     const matrixToggle = this._sidebarRoot.querySelector('#domain-matrix-toggle');
-    const matrixPanel = this._sidebarRoot.querySelector('#domain-matrix-panel');
     matrixToggle?.addEventListener('click', () => {
       this._domainMatrixOpen = !this._domainMatrixOpen;
-      matrixToggle.setAttribute('aria-expanded', this._domainMatrixOpen ? 'true' : 'false');
-      matrixPanel?.classList.toggle('is-open', this._domainMatrixOpen);
-      if (matrixPanel) matrixPanel.hidden = !this._domainMatrixOpen;
-
-      if (!this._domainMatrixOpen) {
-        this._expandedDomainId = null;
-        this._sidebarRoot.querySelectorAll('[data-toggle-path]').forEach(header => {
-          header.classList.remove('is-expanded');
-          header.closest('.sidebar-domain')?.classList.remove('is-expanded');
-          header.setAttribute('aria-expanded', 'false');
-          const chevron = header.querySelector('.sidebar-domain-card__chevron');
-          if (chevron) chevron.textContent = '+';
-        });
-
-        this._sidebarRoot.querySelectorAll('[data-path-modules]').forEach(modules => {
-          modules.classList.remove('is-expanded');
-          modules.hidden = true;
-          modules.setAttribute('aria-hidden', 'true');
-        });
-      }
-
-      const chevron = matrixToggle.querySelector('.sidebar-domain-matrix__chevron');
-      if (chevron) chevron.textContent = this._domainMatrixOpen ? '−' : '+';
-    });
-
-    this._sidebarRoot.querySelectorAll('[data-toggle-path]').forEach(header => {
-      const togglePath = () => {
-        const pathId = header.getAttribute('data-toggle-path');
-        const modules = this._sidebarRoot.querySelector(`[data-path-modules="${pathId}"]`);
-        const expanded = this._expandedDomainId !== pathId;
-        this._expandedDomainId = expanded ? pathId : null;
-
-        this._sidebarRoot.querySelectorAll('[data-toggle-path]').forEach(otherHeader => {
-          const otherPathId = otherHeader.getAttribute('data-toggle-path');
-          const isCurrent = expanded && otherPathId === pathId;
-          otherHeader.classList.toggle('is-expanded', isCurrent);
-          otherHeader.closest('.sidebar-domain')?.classList.toggle('is-expanded', isCurrent);
-          otherHeader.setAttribute('aria-expanded', isCurrent ? 'true' : 'false');
-
-          const otherModules = this._sidebarRoot.querySelector(`[data-path-modules="${otherPathId}"]`);
-          otherModules?.classList.toggle('is-expanded', isCurrent);
-          if (otherModules) {
-            otherModules.hidden = !isCurrent;
-            otherModules.setAttribute('aria-hidden', isCurrent ? 'false' : 'true');
-          }
-
-          const otherChevron = otherHeader.querySelector('.sidebar-domain-card__chevron');
-          if (otherChevron) otherChevron.textContent = isCurrent ? '−' : '+';
-        });
-
-        modules?.classList.toggle('is-expanded', expanded);
-        if (modules) {
-          modules.hidden = !expanded;
-          modules.setAttribute('aria-hidden', expanded ? 'false' : 'true');
-        }
-        header.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-
-        const chevron = header.querySelector('.sidebar-domain-card__chevron');
-        if (chevron) chevron.textContent = expanded ? '−' : '+';
-      };
-
-      header.addEventListener('click', event => {
-        if (event.target.closest('a')) return;
-        togglePath();
-      });
-
-      header.addEventListener('keydown', event => {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault();
-        togglePath();
-      });
+      this._renderSidebar();
+      this._setActiveLink(stateManager.getState('currentRoute') || '/');
     });
   }
 

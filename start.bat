@@ -6,20 +6,19 @@ echo.
 echo Press Ctrl+C to stop the server when done.
 echo.
 
-REM Try Python 3 first
-python -m http.server 8080 2>nul
+REM Try npx serve first (solves Windows MIME type issues for ES6 modules)
+call npx serve -p 8080 . 2>nul
 if %errorlevel% neq 0 (
-    REM Try py launcher
-    py -m http.server 8080 2>nul
+    REM Fallback to Python 3
+    echo npx serve not found, trying python...
+    python -m http.server 8080 2>nul
     if %errorlevel% neq 0 (
-        echo Python not found. Trying alternative...
-        REM Try npx serve as fallback
-        npx serve -p 8080 . 2>nul
+        REM Try py launcher
+        py -m http.server 8080 2>nul
         if %errorlevel% neq 0 (
             echo.
             echo ERROR: Could not start server automatically.
-            echo Please install Python from https://python.org
-            echo Then run: python -m http.server 8080
+            echo Please install Node.js (npx serve) or Python.
             pause
         )
     )
