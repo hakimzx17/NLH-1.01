@@ -1,53 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <!--
-  ╔══════════════════════════════════════════════════════════════╗
-  ║         NETWORK LEARNING PLATFORM — Entry Point             ║
-  ║  Responsibility: Shell HTML. Loads CSS and bootstraps app.  ║
-  ║  No logic lives here. All behavior is in /js/app.js         ║
-  ╚══════════════════════════════════════════════════════════════╝
-  -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NetlearnHub — Interactive Networking Platform</title>
-
-  <!-- Layer 1: CSS Design System -->
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="css/themes.css" />
-  <link rel="stylesheet" href="css/learning.css?v=11" />
-  <link rel="stylesheet" href="css/flashcard.css?v=2" />
-  <link rel="stylesheet" href="css/cyber-identity.css?v=20" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d1117">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>NetLearnHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-
 <body>
-
-  <!-- Navigation Component Mount Point -->
-  <div id="navbar-root"></div>
-
-  <!-- Primary Application Shell -->
-  <div id="app-shell">
-
-    <!-- Sidebar Navigation -->
-    <aside id="sidebar-root"></aside>
-
-    <!-- Main Content Area: Router injects module views here -->
-    <main id="view-root"></main>
-
-  </div>
-
-  <!-- Global Modal Mount Point -->
-  <div id="modal-root"></div>
-
-  <!-- Toast / Notification Mount Point -->
-  <div id="toast-root" role="status" aria-live="polite" aria-atomic="true"></div>
-
-  <!-- Bootstrap: ES6 module entry point -->
-  <script type="module" src="js/app.js?v=3"></script>
-
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
-
 </html>
